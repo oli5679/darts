@@ -1,4 +1,4 @@
-# darts
+# Darts
 Economic Analysis of Darts Strategies
 
 For a player of given accuracy: 
