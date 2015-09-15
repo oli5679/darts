@@ -6,7 +6,7 @@ d = 0.95
 pdd = 0.45
 pds = 0.325
 ptt = 0.4
-pbb = 0.3
+pbb = 0.40
 pbob = 0.4
 
 pdm = 1 - pdd - pds
@@ -91,16 +91,22 @@ def evaluate_all_triples(current_score, current_dart):
 			possible_triple_strategies.append({'strategy': 'triple ' +str(number), 'expectation': strategy_expectation})
 	return possible_triple_strategies
 
-# def evaluate_bull(current_score):
-# 	if(current_score < 50 or current_score == 51):
-# 		return []
-# 	else:
-# 		bullseye_expectation = d * (pbb * best_strategies_list[current_score-50]['expectation'] + (1-pbb) * best_strategies_list[current_score-25]['expectation'])
-# 		return [{'strategy':'bullseye','expectation':bullseye_expectation}]
+def evaluate_bull(current_score,current_dart):
+	discount = 1
+	if(current_dart == 3):
+		current_dart = 0
+		discount *= d
+	if(current_score < 50 or current_score == 51):
+		return []
+	else:
+		bullseye_expectation = (pbb * best_strategies_list[current_dart][current_score-50]['expectation']) + (pbob * best_strategies_list[current_dart][current_score-25]['expectation'])
+		for number in range(1,21):
+			bullseye_expectation += pbs*best_strategies_list[current_dart][current_score-number]['expectation']
+		bullseye_expectation*=discount
+		return [{'strategy':'bullseye','expectation':bullseye_expectation}]
 
 def find_best_strategy(current_score,throw):
-	all_strategies = evaluate_all_singles(current_score,throw) + evaluate_all_doubles(current_score,throw) + evaluate_all_triples(current_score,throw)
-	#  + evaluate_bull(current_score)
+	all_strategies = evaluate_all_singles(current_score,throw) + evaluate_all_doubles(current_score,throw) + evaluate_all_triples(current_score,throw)+ evaluate_bull(current_score,throw)
 	max_strategy = {'strategy':'placeholder','expectation':0}
 	for strategy in all_strategies:
 		if strategy['expectation']> max_strategy['expectation']:
