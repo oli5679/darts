@@ -1,4 +1,5 @@
 from IPython import embed
+from math import log10
 d = 0.95
 
 # params
@@ -112,8 +113,20 @@ def find_all_best_strategies(best_strategies_list):
 			best_strategy = find_best_strategy(score,throw)
 			best_strategies_list[throw-1].append(best_strategy)
 
-def make_recommendation(current_score, best_strategies_list):
-	print best_strategies_list[current_score]['strategy']
+def make_recommendation(current_score, current_throw, best_strategies_list):
+	print best_strategies_list[current_throw-1][current_score]['strategy']
+	current_score_expectation=best_strategies_list[current_throw-1][current_score]['expectation']
+	time = convert_expectation_to_avg_time(current_score_expectation,d)
+	print "expected time left: " + str(time)
+
+def convert_expectation_to_avg_time(expectation,d):
+	ans = log10(expectation)/log10(d)
+	return round(ans,2)
+
+def calculate_player_average(best_strategies_list):
+	starting_expectation = best_strategies_list[0][501]['expectation']
+	avg_time = convert_expectation_to_avg_time(starting_expectation,d)
+	print "Average: " + str(round(501/avg_time,2))
 
 def print_strategy_table(best_strategies_list):
 	throw_count = 1
@@ -122,15 +135,12 @@ def print_strategy_table(best_strategies_list):
 		print "---------------------"
 		print "throw - " + str(throw_count)
 		for score in throw:
-			row = "Score: " + str(score_count) + " - " "Strategy: " + score['strategy']
+			row = "Score: " + str(score_count) + " - Strategy: " + score['strategy'] + " - Expectation: " + str(score['expectation'])
 			print row
 			score_count +=1
 		throw_count += 1
 
 find_all_best_strategies(best_strategies_list)
+calculate_player_average(best_strategies_list)
 
-
-print_strategy_table(best_strategies_list)
-embed()
-# print best_strategies_list
-# print evaluate_all_singles(5)
+# print_strategy_table(best_strategies_list)
