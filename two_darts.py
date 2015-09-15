@@ -30,10 +30,8 @@ e_2_2 = pdd + (pdm*e_2_3) + (d*pds*e_2_1)
 best_strategies_list[0].append({'strategy':'double one','expectation':e_2_1})
 best_strategies_list[1].append({'strategy':'double one','expectation':e_2_2})
 best_strategies_list[2].append({'strategy':'double one','expectation':e_2_3})
-embed()
 
 def evaluate_all_singles(current_score,current_dart):
-	embed()
 	discount = 1
 	if(current_dart == 3):
 		current_dart = 0
@@ -43,6 +41,7 @@ def evaluate_all_singles(current_score,current_dart):
 		if(current_score - number >  1):
 			strategy_expectation = discount*best_strategies_list[current_dart][current_score-number]['expectation']
 			possible_single_strategies.append({'strategy': 'single ' +str(number), 'expectation': strategy_expectation})
+
 	return possible_single_strategies
 
 def evaluate_non_third_doubles(current_score, current_dart):
@@ -63,11 +62,11 @@ def evaluate_third_double(current_score):
 		if(current_score - 2*number > -1 and current_score - 2* number != 1):
 			z =(
 			(pdd* best_strategies_list[0][current_score - 2*number]['expectation'])+
-			(pds* best_strategies_list[0][current_score *number]['expectation'])+
-			(pdm*pds*best_strategies_list[1][current_score - 2*number]['expectation'])+
-			(pdm*pds* best_strategies_list[1][current_score *number]['expectation'])+
-			(pdm*pdm*pds*best_strategies_list[2][current_score - 2*number]['expectation'])+
-			(pdm*pdm*pds*best_strategies_list[2][current_score *number]['expectation'])
+			(pds* best_strategies_list[0][current_score -number]['expectation'])+
+			(pdm*pdd*best_strategies_list[1][current_score - 2*number]['expectation'])+
+			(pdm*pds*best_strategies_list[1][current_score -number]['expectation'])+
+			(pdm*pdm*pdd*best_strategies_list[2][current_score - 2*number]['expectation'])+
+			(pdm*pdm*pds*best_strategies_list[2][current_score -number]['expectation'])
 			)
 			strategy_expectation = (d * z) / (1 - (d*pdm*pdm*pdm))
 			possible_double_strategies.append({'strategy': 'double ' +str(number), 'expectation': strategy_expectation})
@@ -87,7 +86,7 @@ def evaluate_all_triples(current_score, current_dart):
 	possible_triple_strategies = []
 	for number in range(1,21):
 		if(current_score - 3*number > 1):
-			strategy_expectation = discount*((ptt * best_strategies_list[current_dart][current_score-3*number]['expectation'])+(ptm*best_strategies_list[current_dart][current_score-number]['expectation']))
+			strategy_expectation = discount*((ptt * best_strategies_list[current_dart][current_score-3*number]['expectation'])+(pts*best_strategies_list[current_dart][current_score-number]['expectation']))
 			possible_triple_strategies.append({'strategy': 'triple ' +str(number), 'expectation': strategy_expectation})
 	return possible_triple_strategies
 
@@ -111,21 +110,27 @@ def find_all_best_strategies(best_strategies_list):
 	for score in range(3,502):
 		for throw in range(3,0,-1):
 			best_strategy = find_best_strategy(score,throw)
-			best_strategies_list.append(best_strategy)
+			best_strategies_list[throw-1].append(best_strategy)
 
 def make_recommendation(current_score, best_strategies_list):
 	print best_strategies_list[current_score]['strategy']
 
 def print_strategy_table(best_strategies_list):
-	count = 0
-	for score in best_strategies_list:
-		row = "Score: " + str(count) + " - " "Strategy: " + score['strategy']
-		print row
-		count +=1
+	throw_count = 1
+	for throw in best_strategies_list:
+		score_count = 0
+		print "---------------------"
+		print "throw - " + str(throw_count)
+		for score in throw:
+			row = "Score: " + str(score_count) + " - " "Strategy: " + score['strategy']
+			print row
+			score_count +=1
+		throw_count += 1
 
 find_all_best_strategies(best_strategies_list)
-embed()
+
 
 print_strategy_table(best_strategies_list)
+embed()
 # print best_strategies_list
 # print evaluate_all_singles(5)
