@@ -275,15 +275,11 @@ def gen_optimal_strategies(accuracy):
 
     for score in range(2,502):
         for current_throw in range(3):
-            print('score: {} - current throw {}'.format(score,current_throw))
-            print()
             chosen_strategy = find_optimal_strategy(score=score, 
                                                 current_throw=current_throw, 
                                                 strategy_values=optimal_strategy_values,
                                                 accuracy=accuracy)
 
-            print('chosen strategy: {}'.format(chosen_strategy))
-            print()
             optimal_strategies[current_throw][score] = chosen_strategy[0]
             optimal_strategy_values[current_throw][score] = chosen_strategy[1]
 
