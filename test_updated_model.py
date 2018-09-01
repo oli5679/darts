@@ -59,8 +59,6 @@ for number in range(1,21):
     OUTCOME_MAP[50].append(['pbs', number,'constant'])
     OUTCOME_MAP[51].append(['pobs',number,'constant'])
 
-
-
 ACCURACY = {
 'pss': 0.95,
 'pssn':0.025,
@@ -151,3 +149,23 @@ def test_double_one_strategy():
     assert throw_one_eval[1] > 0
     assert throw_two_eval[1] > 0
     assert throw_three_eval[1] > 0
+
+def test_find_first_double():
+    first_dart_strat = updated_model.find_optimal_strategy(score = 2, 
+                                        current_throw = 0, 
+                                        strategy_values = OPTIMAL_STRATEGY_VALUES,
+                                        accuracy=ACCURACY)
+
+    second_dart_strat = updated_model.find_optimal_strategy(score = 2, 
+                                        current_throw = 1, 
+                                        strategy_values = OPTIMAL_STRATEGY_VALUES,
+                                        accuracy=ACCURACY)
+
+    third_dart_strat = updated_model.find_optimal_strategy(score = 2, 
+                                        current_throw = 2, 
+                                        strategy_values = OPTIMAL_STRATEGY_VALUES,
+                                        accuracy=ACCURACY)
+    
+    assert first_dart_strat[0] == (2,1)
+    assert second_dart_strat[0] == (2,1)
+    assert third_dart_strat[0] == (2,1)

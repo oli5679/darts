@@ -97,8 +97,8 @@ def find_optimal_strategy(score, current_throw, strategy_values,accuracy):
                 strategy_values=strategy_values, 
                 accuracy = accuracy)
 
+
     strat_evals.append(double_eval)
-    print(strat_evals)
     # return strategy and expectation for highest strategy
     optimal_strat = min(strat_evals, key = lambda x: x[1])
     return optimal_strat
@@ -129,7 +129,7 @@ def evaluate_non_double_strategy(score, strategy, strategy_values, accuracy, cur
         if outcome_score <= 1:
             bust_prob += probability            
         else:
-            expectation += (probability * strategy_values[[next_throw, outcome_score]])
+            expectation += (probability * strategy_values[next_throw][outcome_score])
         if (outcome_score == 0 and score == 50):
             bust_prob -= probability
             expectation -= probability
@@ -179,7 +179,7 @@ def evaluate_all_non_doubles(score,current_throw,strategy_values,accuracy):
 def evaluate_double(score,current_throw, strategy_values, accuracy):
     miss = accuracy['pdm']
     s1, s2, s0, bust = (0,0,0,0)
-    target = score // 2
+    target = min(score // 2,20)
     targets = get_neighbours(target)
     for target_type in ['upper','lower','target']:
         if target_type == 'target':
@@ -270,17 +270,23 @@ def gen_baseline_strategies_and_expectations(accuracy):
 
 def gen_optimal_strategies(accuracy):
 
-    optimal_strategy_values = np.ones((502,3))*10000
-    optimal_strategies = np.zeros((502,3,2)) 
+    optimal_strategy_values = np.ones((3,502))*10000
+    optimal_strategies = np.zeros((3,502,2)) 
 
     for score in range(2,502):
         for current_throw in range(3):
+            print('score: {} - current throw {}'.format(score,current_throw))
+            print()
             chosen_strategy = find_optimal_strategy(score=score, 
                                                 current_throw=current_throw, 
                                                 strategy_values=optimal_strategy_values,
                                                 accuracy=accuracy)
+
+            print('chosen strategy: {}'.format(chosen_strategy))
+            print()
             optimal_strategies[current_throw][score] = chosen_strategy[0]
             optimal_strategy_values[current_throw][score] = chosen_strategy[1]
+
 
     return [optimal_strategies, optimal_strategy_values]
 

@@ -2,5 +2,6 @@
   "test_updated_model.py::test_get_neighbours",
   "test_updated_model.py::test_bust_strategies_return_10000",
   "test_updated_model.py::test_bust_bull_strategies_return_10000",
-  "test_updated_model.py::test_double_one_strategy"
+  "test_updated_model.py::test_double_one_strategy",
+  "test_updated_model.py::test_find_first_double"
 ]
