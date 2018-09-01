@@ -1,11 +1,9 @@
 from IPython import embed
 from math import log, ceil, floor
-import random
 from tqdm import tqdm
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from ipdb import launch_ipdb_on_exception
 
 board = [
     5,
@@ -117,6 +115,7 @@ def evaluate_non_double_strategy(score, strategy, strategy_values, accuracy, cur
     next_throw = (current_throw + 1) % 3
     targets = get_neighbours(strategy_number)
     bust_prob = 0
+
     if current_throw == 2:
         expectation = 1
     else:
@@ -129,7 +128,7 @@ def evaluate_non_double_strategy(score, strategy, strategy_values, accuracy, cur
         if outcome_score <= 1:
             bust_prob += probability            
         else:
-            expectation += (probability * strategy_values[next_throw][outcome_score])
+            expectation += (probability * strategy_values[next_throw][int(outcome_score)])
         if (outcome_score == 0 and score == 50):
             bust_prob -= probability
             expectation -= probability
@@ -215,57 +214,58 @@ def evaluate_double(score,current_throw, strategy_values, accuracy):
 
 
 def derive_val_from_score(accuracy, strategy, strategy_values,score, current_throw):
-    situation_strategy = strategy[current_throw][score]
-    if situation_strategy[0] == 1:
+    
+    if strategy[0] == 2:
         return evaluate_double(score=score, 
                             current_throw=current_throw,
                             strategy_values=strategy_values,
-                            accuracy=accuracy)
+                            accuracy=accuracy)[1]
     else:
         return evaluate_non_double_strategy(score=score, 
-                                            strategy=situation_strategy, 
+                                            strategy=strategy, 
                                             strategy_values=strategy_values, 
                                             accuracy=accuracy, 
                                             current_throw=current_throw)
 
 
-'''
-def gen_baseline_strategies_and_expectations(accuracy):
-    baseline_strategies = pd.DataFrame(columns=['First dart','Second dart','Third dart'],index=np.arange(502))
+def gen_baseline_strategies(accuracy):
 
-    baseline_strategy_values = pd.DataFrame(columns=['First dart','Second dart','Third dart'],index=np.arange(502))
+    baseline_strategy_values = np.ones((3,502))*10000
+    baseline_strategies = np.zeros((3,502,2)) 
+
+    recommendations = pd.read_csv('strategy.csv',index_col=0)
 
     #filling in baseline strategies
-    for score in range(2,49):
+    for score in range(2,50):
         for throw in range(3):
             if score % 2 == 0 and score < 41:
-                baseline_strategies.iloc[score,throw]=['double',score/2]
+                baseline_strategies[throw][score]=[2,int(score//2)]
             else:
                 strategy = score - int(2**floor(log(score,2)))
-                baseline_strategies.iloc[score,throw]=['single',strategy]
+                baseline_strategies[throw][score]=[1,int(strategy)]
 
-    for strategy in recommendations:
+    for score,strategy in recommendations.iterrows():
         for throw in range(3):
-            baseline_strategies.iloc[score,throw]=recommendations[strategy]
+            baseline_strategies[throw][score][0]=strategy[0]
+            baseline_strategies[throw][score][1]=strategy[1]
 
     for score in range(137,502):
         for throw in range(3):
-            if baseline_strategies[throw][score] == 0:
-                baseline_strategies[throw][score]=['triple',20]
+            if baseline_strategies[throw][score][0] == 0:
+                baseline_strategies[throw][score]=[3,20]
 
-    pds = accuracy['pds']
-    pdd = accuracy['pdd']
-    pdm = 1 - pds - pdd
-
-    for score in range(3,502):
+    for score in tqdm(range(2,502)):
         # start from 3rd throw and work backwards (so missing board and staying on same score can be tackled)
-        for current_throw in [0,1,2]:
-             baseline_strategy_values[current_throw][score] = derive_val_from_score(accuracy =accuracy,
-                                                                                    strategies=baseline_strategies,
-                                                                                    baseline_strategybaseline_strategy_values,score,current_throw)
+        for current_throw in range(3):
+            print('score: {} - throw: {}'.format(score,current_throw))
+            baseline_strategy_values[current_throw][score] = derive_val_from_score(accuracy = accuracy, 
+                                                        strategy = baseline_strategies[current_throw][score], 
+                                                        strategy_values=baseline_strategy_values,
+                                                        score=score,
+                                                        current_throw=current_throw)
 
     return [baseline_strategies, baseline_strategy_values]
-'''
+
 
 
 def gen_optimal_strategies(accuracy):
@@ -273,7 +273,7 @@ def gen_optimal_strategies(accuracy):
     optimal_strategy_values = np.ones((3,502))*10000
     optimal_strategies = np.zeros((3,502,2)) 
 
-    for score in range(2,502):
+    for score in tqdm(range(2,502)):
         for current_throw in range(3):
             chosen_strategy = find_optimal_strategy(score=score, 
                                                 current_throw=current_throw, 
@@ -290,13 +290,13 @@ if __name__ == '__main__':
 #rec_source = 'http://dartsinfoworld.com/darts-checkout-table/'
 
     optimal_strategies, optimal_strategy_values = gen_optimal_strategies(ACCURACY)
-
-#baseline_strategies, baseline_strategy_values = gen_baseline_strategies_and_expectations(accuracy)
+    baseline_strategies, baseline_strategy_values = gen_baseline_strategies(ACCURACY)
 
 #sim_optimal_strategy_values = sim_strategy_values(accuracy,optimal_strategies,m)
 
 #sim_baseline_strategy_values =  sim_strategy_values(accuracy,baseline_strategies,m)
 
-#plt.plot(optimal_strategy_values[0][2:180],'red')
-#plt.plot(baseline_strategy_values[0][2:180],'yellow')
-#plt.show() 
+    plt.plot(optimal_strategy_values[0][2:180],'red')
+    plt.plot(baseline_strategy_values[0][2:180],'yellow')
+    plt.show() 
+
