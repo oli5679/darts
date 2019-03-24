@@ -31,7 +31,6 @@ class Player():
         pdd = self.accuracy['pdd']
         pds = self.accuracy['pds']
         pdm = self.accuracy['pdm']
-
         # solutions to similtaneous equations for strategy of double 1 on score 2 (only strategy that doesn't go bust!)
         e_2_1_denominator = 1 - \
             (d*(pds + (pdm*pds) + (pdm*pdm*pds) + (pdm*pdm*pdm)))
@@ -61,12 +60,10 @@ class Player():
 
     def generate_next_throw_details(self, current_throw):
         # what index shall we use to look up expectations? do we need to discount?
-        discount = 1
-        next_throw = current_throw + 1
-        if(next_throw == 3):
-            next_throw = 0
-            discount = self.discount_rate
-        return (discount, next_throw)
+        if(current_throw == 2):
+            return (self.discount_rate, 0)
+        else:
+            return (1, current_throw+1)
 
     def evaluate_all_singles(self, score, current_throw):
         discount, next_throw = self.generate_next_throw_details(current_throw)
