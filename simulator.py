@@ -27,6 +27,7 @@ def sim_strat(score,throw,strategies,accuracy):
 
         elif ongoing_flag and score - payoff <= 1:
             count += 1
+            throw -= 1
         else:
             score = int(score - payoff)
     return count
