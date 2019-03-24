@@ -12,6 +12,8 @@ class Player():
         self.add_finished_and_bust_strategy_values()
         self.add_double_one_strategy()
         self.find_all_optimal_strategies()
+        self.finish_times = np.log10(
+            self.strategy_values)/np.log10(self.discount_rate)
 
     def add_finished_and_bust_strategy_values(self):
         self.strategy_values[:, 0] = 1
@@ -128,3 +130,10 @@ class Player():
                     self.strategy_values[next_throw, score-number]
             strategy_expectation * discount
             return [{'strategy': 'bullseye', 'expectation': strategy_expectation}]
+
+    def recommend(self, score, current_throw):
+        return (self.strategies.iloc[score, current_throw-1],
+                self.finish_times[current_throw-1, score])
+
+    def find_average(self):
+        return 501/self.finish_times[0, 501]
