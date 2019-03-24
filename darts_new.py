@@ -105,7 +105,7 @@ class Player():
                         (pdm * self.strategy_values[next_throw, score]))
                 possible_double_strategies.append(
                     {'strategy': 'double ' + str(target), 'expectation': strategy_expectation})
-            return possible_double_strategies
+        return possible_double_strategies
 
     def evaluate_all_triples(self, score, current_throw):
         discount, next_throw = self.generate_next_throw_details(current_throw)
