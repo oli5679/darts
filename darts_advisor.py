@@ -36,7 +36,7 @@ class Player():
             (d*(pds + (pdm*pds) + (pdm*pdm*pds) + (pdm*pdm*pdm)))
         e_2_1 = (pdd*(1 + pdm +
                       (pdm*pdm)))/e_2_1_denominator
-        e_2_3 = pdd + d*(pdm+pds)*e_2_1
+        e_2_3 = pdd + (d*(pdm+pds)*e_2_1)
         e_2_2 = pdd + (pdm*e_2_3) + (d*pds*e_2_1)
         self.strategy_values[:, 2] = (e_2_1, e_2_2, e_2_3)
         self.strategies.loc[2] = ('double 1', 'double 1', 'double 1',)
