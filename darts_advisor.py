@@ -3,12 +3,12 @@ import pandas as pd
 
 
 class Player():
-    def __init__(self, discount_rate, accuracy):
+    def __init__(self, accuracy, discount_rate=0.95):
         self.discount_rate = discount_rate
         self.accuracy = self.generate_accuracy(accuracy)
         self.strategy_values = np.zeros((3, 502))
         self.strategies = pd.DataFrame(index=range(502), columns=[
-                                       'first', 'second', 'third'])
+                                       'throw 1', 'throw 2', 'throw 3'])
         self.add_finished_and_bust_strategy_values()
         self.add_double_one_strategy()
         self.find_all_optimal_strategies()
@@ -44,19 +44,24 @@ class Player():
     def find_all_optimal_strategies(self):
         for score in range(3, 502):
             # start from 3rd throw and work backwards
-            for current_throw in range(2, -1, -1):
+            for current_throw in [2, 1, 0]:
                 self.find_optimal_strategy(score, current_throw)
 
-    def find_optimal_strategy(self, score, current_throw):
+    def find_all_strategies(self, score, current_throw):
         # find all strategies and expectations for given score/throw input
-        all_strategies = (self.evaluate_all_singles(score, current_throw) +
-                          self.evaluate_all_doubles(score, current_throw) +
-                          self.evaluate_all_triples(score, current_throw) +
-                          self.evaluate_bull(score, current_throw))
+
+        return (self.evaluate_all_singles(score, current_throw) +
+                self.evaluate_all_doubles(score, current_throw) +
+                self.evaluate_all_triples(score, current_throw) +
+                self.evaluate_bull(score, current_throw))
+
+    def find_optimal_strategy(self, score, current_throw):
+        all_strategies = self.find_all_strategies(score, current_throw)
         # return strategy and expectation for highest strategy
         optimal = sorted(all_strategies, key=lambda x: x['expectation'])[-1]
         self.strategy_values[current_throw, score] = optimal['expectation']
         self.strategies.iloc[score, current_throw] = optimal['strategy']
+        return optimal
 
     def generate_next_throw_details(self, current_throw):
         # what index shall we use to look up expectations? do we need to discount?
@@ -87,16 +92,16 @@ class Player():
                 pdm = self.accuracy['pdm']
                 d = self.discount_rate
                 if(current_throw == 2):
-                    z = ((pdd * self.strategy_values[0, score - 2 * target]) +
+                    z = ((pdd * self.strategy_values[0, score - (2 * target)]) +
                          (pds * self.strategy_values[0, score - target]) +
-                         (pdm * pdd * self.strategy_values[1, score - 2 * target]) +
+                         (pdm * pdd * self.strategy_values[1, score - (2 * target)]) +
                          (pdm * pds * self.strategy_values[1, score - target]) +
-                         (pdm * pdm * pdd * self.strategy_values[2, score - 2 * target]) +
+                         (pdm * pdm * pdd * self.strategy_values[2, score - (2 * target)]) +
                          (pdm * pdm * pds * self.strategy_values[2, score - target]))
                     strategy_expectation = (d * z) / (1 - (d*pdm*pdm*pdm))
                 else:
                     strategy_expectation = (
-                        (pdd * self.strategy_values[next_throw, score-2*target]) +
+                        (pdd * self.strategy_values[next_throw, score-(2*target)]) +
                         (pds * self.strategy_values[next_throw, score-target]) +
                         (pdm * self.strategy_values[next_throw, score]))
                 double_strategies.append(
@@ -109,7 +114,7 @@ class Player():
         for target in range(1, 21):
             if(score - 3*target > 1):
                 strategy_expectation = \
-                    discount*((self.accuracy['ptt'] * self.strategy_values[next_throw, score-3*target]) +
+                    discount*((self.accuracy['ptt'] * self.strategy_values[next_throw, score-(3*target)]) +
                               (self.accuracy['pts'] * self.strategy_values[next_throw, score-target]))
                 triple_strategies.append(
                     {'strategy': 'triple ' + str(target), 'expectation': strategy_expectation})
@@ -125,8 +130,7 @@ class Player():
             for number in range(1, 21):
                 strategy_expectation += self.accuracy['pbs'] * \
                     self.strategy_values[next_throw, score-number]
-            strategy_expectation * discount
-            return [{'strategy': 'bullseye', 'expectation': strategy_expectation}]
+            return [{'strategy': 'bullseye', 'expectation': strategy_expectation * discount}]
 
     def recommend(self, score, current_throw):
         return (self.strategies.iloc[score, current_throw-1],
